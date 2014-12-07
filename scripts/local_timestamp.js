@@ -58,4 +58,6 @@ LocalTimeStamp =
 
 }
 
-processPostEvent.addHandler(LocalTimeStamp.convertTime);
+if(isRunningAtNixxed()) {
+	processPostEvent.addHandler(LocalTimeStamp.convertTime);
+}

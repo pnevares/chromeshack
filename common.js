@@ -156,3 +156,7 @@ function getCookieValue(name, defaultValue)
     }
     return ret;
 }
+
+function isRunningAtNixxed() {
+    return (window.location.hostname.indexOf("nixxed.com") >= 0) || (window.location.hostname.indexOf("localhost") >= 0);
+}

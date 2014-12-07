@@ -11,6 +11,9 @@ settingsLoadedEvent.addHandler(function()
             loadVideos: function(item, id)
             {
                 var postbody = getDescendentByTagAndClassName(item, "div", "postbody");
+                if(postbody === undefined) {
+                    postbody = getDescendentByTagAndClassName(item, "div", "postBody");
+                }
                 var links = postbody.getElementsByTagName("a");
 
                 for (var i = 0; i < links.length; i++)

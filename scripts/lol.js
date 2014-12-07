@@ -208,21 +208,22 @@ settingsLoadedEvent.addHandler(function()
                 else
                 {
                     // If this is a subthread, the root needs to be found
-                    var liItem = document.getElementById('item_' + threadId); 
-                    if (liItem)
-                    {
-                        do 
-                        {
-                            liItem = liItem.parentNode; 
-                            
-                            if (liItem.className == 'root')
-                            {
-                                rootId = liItem.id.split('_')[1];
-                                break;
-                            }
-                        }
-                        while (liItem.parentNode != null)
-                    }
+                    var rootPost = $('#item_' + threadId).parents("[id^='root_']");
+                    rootId = rootPost[0].id.substr(5);
+                    //if (liItem)
+                    //{
+                    //    do
+                    //    {
+                    //        liItem = liItem.parentNode;
+                    //
+                    //        if (liItem.className == 'root')
+                    //        {
+                    //            rootId = liItem.id.split('_')[1];
+                    //            break;
+                    //        }
+                    //    }
+                    //    while (liItem.parentNode != null)
+                    //}
                 }
                 
                 if (rootId == -1)
