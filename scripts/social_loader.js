@@ -82,6 +82,9 @@ settingsLoadedEvent.addHandler(function()
                     twitterWidget.setAttribute('src', '//platform.twitter.com/widgets.js');
                     twitterWidget.setAttribute('charset', 'utf-8');
                     document.head.appendChild(twitterWidget);
+                }).fail(function() {
+                    // GET failed, fall back to opening the link
+                    window.open(link.href);
                 });
                 
                 // we'll attach it to the document in the callback
