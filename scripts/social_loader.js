@@ -7,6 +7,8 @@ settingsLoadedEvent.addHandler(function()
             SOCIAL_TYPE_NONE: 0,
             SOCIAL_TYPE_TWITTER: 1,
 
+            tweetCache: {},
+
             loadSocial: function(item, id)
             {
                 var postbody = getDescendentByTagAndClassName(item, "div", "postbody");
@@ -33,11 +35,11 @@ settingsLoadedEvent.addHandler(function()
             toggleSocial: function(e)
             {
                 // left click only
-                if (e.button == 0)
+                if (e.button === 0)
                 {
                     var link = this;
                     // if there is an embed after the link, remove it
-                    if (link.nextSibling != null && link.nextSibling.className == "SocialLoader")
+                    if (link.nextSibling !== null && link.nextSibling.className === "SocialLoader")
                     {
                         link.parentNode.removeChild(link.nextSibling);
                     }
@@ -48,63 +50,54 @@ settingsLoadedEvent.addHandler(function()
                         var social;
 
                         if (type == SocialLoader.SOCIAL_TYPE_TWITTER)
-                            social = SocialLoader.createTwitter(link);
-
-                        // we actually created an embed
-                        if (social != null)
-                        {
-                            var div = document.createElement("div");
-                            div.className = "SocialLoader";
-                            div.appendChild(social);
-
-                            // add the embed right after the link
-                            link.parentNode.insertBefore(div, link.nextSibling);
-                        }
+                            SocialLoader.fetchTwitter(link);
                     }
                     
                     e.preventDefault();
                 }
             },
 
-            createTwitter: function(link)
+            fetchTwitter: function(link)
             {
-                $.get("http://localhost:8000/tweet?tweetUrl=" + link.href, function(data) {
-                    var div = document.createElement("div");
-                    div.className = "SocialLoader";
-                    div.innerHTML = data;
-                    div.firstChild.setAttribute('data-theme', 'dark');
+                if(SocialLoader.tweetCache.hasOwnProperty(link)) {
+                    SocialLoader.createTwitter(link, SocialLoader.tweetCache[link]);
+                } else {
+                    $.ajax({
+                        url: 'http://chatty.nevares.com/tweet',
+                        data: 'tweetUrl=' + link.href,
+                        dataType: 'html',
+                        timeout: 5000,
+                        success: function(data) {
+                            SocialLoader.createTwitter(link, data);
+                            SocialLoader.tweetCache[link] = data;
+                        },
+                        error: function() {
+                            // GET failed, fall back to opening the link
+                            window.open(link.href);
+                        }
+                    });
+                }
 
-                    // add the embed right after the link
-                    link.parentNode.insertBefore(div, link.nextSibling);
-
-                    var twitterWidget = document.createElement('script');
-                    twitterWidget.setAttribute('async', '');
-                    twitterWidget.setAttribute('src', '//platform.twitter.com/widgets.js');
-                    twitterWidget.setAttribute('charset', 'utf-8');
-                    document.head.appendChild(twitterWidget);
-                }).fail(function() {
-                    // GET failed, fall back to opening the link
-                    window.open(link.href);
-                });
-                
                 // we'll attach it to the document in the callback
                 return null;
             },
 
-            createTwitter_IFRAME: function(href)
-            {
-                var width = 640, height = 390;
+            createTwitter: function(link, data) {
+                var div = document.createElement("div");
+                div.className = "SocialLoader";
+                div.innerHTML = data;
+                div.firstChild.setAttribute('data-theme', 'dark');
 
-                var i = document.createElement("iframe");
-                i.setAttribute("type", "text/html");
-                i.setAttribute("width", width);
-                i.setAttribute("height", height);
-                i.setAttribute("src", "http://localhost:8000/tweet?tweetUrl=" + href);
-                i.setAttribute("frameborder", "0");
+                // add the embed right after the link
+                link.parentNode.insertBefore(div, link.nextSibling);
 
-                return i;
+                var twitterWidget = document.createElement('script');
+                twitterWidget.setAttribute('async', '');
+                twitterWidget.setAttribute('src', '//platform.twitter.com/widgets.js');
+                twitterWidget.setAttribute('charset', 'utf-8');
+                document.head.appendChild(twitterWidget);
             }
-        }
+        };
 
         processPostEvent.addHandler(SocialLoader.loadSocial);
     }
